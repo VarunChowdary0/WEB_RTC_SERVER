@@ -17,13 +17,21 @@ app.get('/', (req, res) => {
 	res.send('Running');
 });
 
-io.on("connection", (socket) => {
-	console.log(socket.id,"connected")
-	socket.emit("me", socket.id);
+let All_id_Array = []
 
-	socket.on("diconnected",()=>{
-		console.log(socket.id,"disconnected");
-	})
+io.on("connection", (socket) => {
+	All_id_Array.push(socket.id)
+	socket.emit('newly_joined',All_id_Array);
+	console.log(socket.id,"connected")
+	console.log(All_id_Array)
+	socket.emit("me", socket.id);
+	
+
+	socket.on("disconnect", () => {
+        console.log(`${socket.id} is disconnected.`);
+		const index = All_id_Array.indexOf(socket.id);
+		All_id_Array.splice(index,1)
+    });
 
 	socket.on('ENDCALL',(idToEndCall)=>{
 		io.to(idToEndCall).emit('ENDCALL',(idToEndCall))
@@ -35,8 +43,11 @@ io.on("connection", (socket) => {
 
 	socket.on("AnswerCall", (data) => {
 		io.to(data.to).emit("callAccepted", data.signal)
-        console.log(data)
+        // console.log(data.to)
+		// const index = All_id_Array.indexOf(data.to);
+		// All_id_Array.splice(index,1)
 	});
 });
+
 
 server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
