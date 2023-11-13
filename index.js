@@ -19,11 +19,15 @@ app.get('/', (req, res) => {
 
 let All_id_Array = []
 
+
 io.on("connection", (socket) => {
 	All_id_Array.push(socket.id)
+	socket.on('newly_joined',()=>{
+		io.emit('newly_joined',All_id_Array);
+		console.log(All_id_Array)
+	})
 	socket.emit('newly_joined',All_id_Array);
 	console.log(socket.id,"connected")
-	console.log(All_id_Array)
 	socket.emit("me", socket.id);
 	
 
@@ -31,6 +35,7 @@ io.on("connection", (socket) => {
         console.log(`${socket.id} is disconnected.`);
 		const index = All_id_Array.indexOf(socket.id);
 		All_id_Array.splice(index,1)
+		io.emit("newly_joined", All_id_Array);
     });
 
 	socket.on('ENDCALL',(idToEndCall)=>{
