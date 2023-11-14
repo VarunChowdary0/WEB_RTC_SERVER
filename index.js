@@ -24,8 +24,8 @@ io.on("connection", (socket) => {
 	All_id_Array.push(socket.id)
 	socket.on('newly_joined',()=>{
 		io.emit('newly_joined',All_id_Array);
-		console.log(All_id_Array)
 	})
+	console.log(All_id_Array)
 	socket.emit('newly_joined',All_id_Array);
 	console.log(socket.id,"connected")
 	socket.emit("me", socket.id);
@@ -38,8 +38,9 @@ io.on("connection", (socket) => {
 		io.emit("newly_joined", All_id_Array);
     });
 
-	socket.on('ENDCALL',(idToEndCall)=>{
-		io.to(idToEndCall).emit('ENDCALL',(idToEndCall))
+	socket.on('ENDCALL',(id1,id2)=>{
+		io.to(id2).to(id1).emit('ENDCALL',(id1,id2))
+		console.log("Call ended by : ",id1,id2)
 	})
 
 	socket.on("CallUser", ({ userToCall, signalData, from, name }) => {
@@ -47,8 +48,8 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("AnswerCall", (data) => {
-		io.to(data.to).emit("callAccepted", data.signal)
-        // console.log(data.to)
+		io.to(data.to).emit("callAccepted", {signal:data.signal,from:data.from})
+        console.log("Answer by: ",data.to)
 		// const index = All_id_Array.indexOf(data.to);
 		// All_id_Array.splice(index,1)
 	});
